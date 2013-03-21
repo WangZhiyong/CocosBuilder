@@ -97,6 +97,8 @@ enum {
     IBOutlet NSView* rightPanel;
     IBOutlet NSSegmentedControl *panelVisibilityControl;
     
+    IBOutlet NSButton *loopPlayback;
+    
     // Cocos2D view
     IBOutlet CCBGLView* cocosView;
     IBOutlet NSView* mainView;
@@ -244,6 +246,8 @@ enum {
 @property (nonatomic,readonly) IBOutlet NSMenu* menuContextKeyframeInterpol;
 @property (nonatomic,readonly) IBOutlet NSMenu* menuContextResManager;
 @property (nonatomic,readonly) NSSegmentedControl *panelVisibilityControl;
+
+@property (nonatomic,readonly) IBOutlet NSButton *loopPlayback;
 
 @property (nonatomic,retain) ProjectSettings* projectSettings;
 @property (nonatomic,readonly) PlayerConnection* connection;

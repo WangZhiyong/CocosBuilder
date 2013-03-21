@@ -120,6 +120,7 @@
 @synthesize loadedSelectedNodes;
 @synthesize panelVisibilityControl;
 @synthesize connection;
+@synthesize loopPlayback;
 
 static CocosBuilderAppDelegate* sharedAppDelegate;
 
@@ -319,6 +320,9 @@ static CocosBuilderAppDelegate* sharedAppDelegate;
         // First run completed
         [[NSUserDefaults standardUserDefaults] setObject:[NSNumber numberWithBool:YES] forKey:@"completedFirstRun"];
     }
+    
+    //  Set initial value
+    [[NSUserDefaults standardUserDefaults] setObject:[NSNumber numberWithBool:NO] forKey:@"loopPlayback"];
 }
 
 #pragma mark Notifications to user
@@ -3113,7 +3117,35 @@ static BOOL hideAllToNextSeparator;
         
         if (sequenceHandler.currentSequence.timelinePosition >= sequenceHandler.currentSequence.timelineLength)
         {
-            [self playbackStop:NULL];
+            if ( NO == [[[NSUserDefaults standardUserDefaults] valueForKey:@"loopPlayback"] boolValue] ) {
+                
+                [self playbackStop:nil];
+            }
+            else {
+                
+                //  Automatically looping play
+                
+                float delta = sequenceHandler.currentSequence.timelinePosition - sequenceHandler.currentSequence.timelineLength;
+                sequenceHandler.currentSequence.timelinePosition = 0;
+                
+                double thisTime = [NSDate timeIntervalSinceReferenceDate];
+                double requestedDelay = 1/sequenceHandler.currentSequence.timelineResolution;
+                double extraTime = thisTime - (playbackLastFrameTime + requestedDelay);
+                
+                extraTime -= delta;
+                
+                double delayTime = requestedDelay - extraTime;
+                playbackLastFrameTime = thisTime;
+                int nextStep = 1;
+                while (delayTime < 0)
+                {
+                    delayTime += requestedDelay;
+                    nextStep++;
+                }
+                
+                // Call this method again in a little while
+                [self performSelector:@selector(playbackStep:) withObject:[NSNumber numberWithInt:nextStep] afterDelay:delayTime];
+            }
         }
         else
         {
@@ -3195,6 +3227,24 @@ static BOOL hideAllToNextSeparator;
     else if (tag == -1)
     {
         NSLog(@"No selected index!!");
+    }
+}
+
+- (IBAction)pressedLoopPlayback:(id)sender
+{
+    if ( YES == [[[NSUserDefaults standardUserDefaults] valueForKey:@"loopPlayback"] boolValue] ) {
+        
+        [[NSUserDefaults standardUserDefaults] setValue:[NSNumber numberWithBool:NO] forKey:@"loopPlayback"];
+        [[NSUserDefaults standardUserDefaults] synchronize];
+        
+        [loopPlayback setState:NSOffState];
+    }
+    else {
+    
+        [[NSUserDefaults standardUserDefaults] setValue:[NSNumber numberWithBool:YES] forKey:@"loopPlayback"];
+        [[NSUserDefaults standardUserDefaults] synchronize];
+        
+        [loopPlayback setState:NSOnState];
     }
 }
 
