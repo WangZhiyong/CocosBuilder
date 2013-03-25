@@ -79,6 +79,7 @@
 #import "PlayerConsoleWindow.h"
 #import "SequencerUtil.h"
 #import "SequencerStretchWindow.h"
+#import "SequencerScaleWindow.h"
 #import "SequencerSoundChannel.h"
 #import "SequencerCallbackChannel.h"
 #import "CustomPropSettingsWindow.h"
@@ -3010,6 +3011,21 @@ static BOOL hideAllToNextSeparator;
     }
 }
 
+- (IBAction)menuScaleSelectedNode:(id)sender
+{
+    if ([[self selectedNodes] count] !=1)
+        [self setSelectedNodes: [NSArray arrayWithObject:[CocosScene cocosScene].rootNode]];
+    
+    SequencerScaleWindow* wc = [[[SequencerScaleWindow alloc] initWithWindowNibName:@"SequencerScaleWindow"] autorelease];
+    wc.factor = 1;
+    
+    int success = [wc runModalSheetForWindow:window];
+    if (success)
+    {
+        [SequencerUtil scaleSelectedNode:wc.factor];
+    }
+}
+
 - (IBAction)menuReverseSelectedKeyframes:(id)sender
 {
     [SequencerUtil reverseSelectedKeyframes];
@@ -3066,6 +3082,10 @@ static BOOL hideAllToNextSeparator;
     else if (menuItem.action == @selector(menuStretchSelectedKeyframes:))
     {
         return (hasOpenedDocument && [SequencerUtil canStretchSelectedKeyframes]);
+    }
+    else if (menuItem.action == @selector(menuScaleSelectedNode:))
+    {
+        return (hasOpenedDocument && [SequencerUtil canScaleSelectedNode]);
     }
     else if (menuItem.action == @selector(menuReverseSelectedKeyframes:))
     {

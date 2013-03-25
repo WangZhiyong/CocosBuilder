@@ -35,6 +35,56 @@
 #import "SequencerNodeProperty.h"
 #import "CCBWriterInternal.h"
 
+#import "NodeInfo.h"
+#import "PositionPropertySetter.h"
+
+@interface CCNode(NodeScaleWithChildren)
+- (void)scaleWithChildrenBy:(float)factor;
+@end
+
+@implementation CCNode(NodeScaleWithChildren)
+
+- (void)scaleWithChildrenBy:(float)factor {
+    
+    for (CCNode *child in _children) {
+        
+        CGPoint pt = child->_position;
+        pt = CGPointMake(pt.x*factor, pt.y*factor);
+        NSArray* animValue = [NSArray arrayWithObjects:
+                              [NSNumber numberWithFloat:pt.x],
+                              [NSNumber numberWithFloat:pt.y],
+                              NULL];
+        
+        PlugInNode *plugIn = [child plugIn];
+        
+        //  1) scale position automatically
+        if ([plugIn isAnimatableProperty:@"position" node:child])
+        {
+            NodeInfo *nodeInfo = [child userObject];;
+            [[nodeInfo baseValues] setObject:animValue forKey:@"position"];
+            
+            [PositionPropertySetter setPosition:NSPointFromCGPoint(pt) forNode:child prop:@"position"];
+        }
+        
+        //  2) scale CCLayerColor node automatically
+        if ([[plugIn nodeClassName] isEqualToString:@"CCLayerColor"]) {
+            
+            NodeInfo *nodeInfo = [child userObject];;
+            NSSize sz = [[[nodeInfo extraProps] valueForKey:@"contentSize"] sizeValue];
+            sz = NSMakeSize(sz.width*factor, sz.height*factor);
+            [[nodeInfo extraProps] setObject:[NSValue valueWithSize:sz] forKey:@"contentSize"];
+            
+            int type = [PositionPropertySetter sizeTypeForNode:child prop:@"contentSize"];
+            [PositionPropertySetter setSize:sz type:type forNode:child prop:@"contentSize"];
+        }
+        
+        //  recursion
+        [child scaleWithChildrenBy:factor];
+    }
+}
+
+@end
+
 @implementation SequencerUtil
 
 + (NSArray*) selectedResources
@@ -228,6 +278,35 @@
     [SequencerUtil removeDuplicateKeyframesForSelection];
     
     [[SequencerHandler sharedHandler] redrawTimeline];
+    [[SequencerHandler sharedHandler] updatePropertiesToTimelinePosition];
+}
+
++ (BOOL) canScaleSelectedNode
+{
+    CocosBuilderAppDelegate *appDelegate = [CocosBuilderAppDelegate appDelegate];
+    [appDelegate saveUndoStateWillChangeProperty:@"*scaleSelectedNode"];
+    
+    CCNode *startNode = [appDelegate selectedNode];
+    if (startNode==nil || [startNode.children count]==0)
+        return NO;
+
+    return YES;
+}
+
++ (void) scaleSelectedNode:(float) factor
+{
+    BOOL canScale = [SequencerUtil canScaleSelectedNode];
+    if (!canScale) return;
+    
+    if (factor==1.0f)
+        return;
+    
+    CocosBuilderAppDelegate *appDelegate = [CocosBuilderAppDelegate appDelegate];
+    [appDelegate saveUndoStateWillChangeProperty:@"*scaleSelectedNode"];
+    
+    CCNode *startNode = [appDelegate selectedNode];
+    [startNode scaleWithChildrenBy:factor];
+
     [[SequencerHandler sharedHandler] updatePropertiesToTimelinePosition];
 }
 

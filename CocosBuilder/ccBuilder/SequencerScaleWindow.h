@@ -22,23 +22,13 @@
  * THE SOFTWARE.
  */
 
-#import <Foundation/Foundation.h>
+#import "CCBModalSheetController.h"
 
-@interface SequencerUtil : NSObject
+@interface SequencerScaleWindow : CCBModalSheetController
+{
+    float factor;
+}
 
-+ (BOOL) canCreateFramesFromSelectedResources;
-+ (void) createFramesFromSelectedResources;
-
-+ (BOOL) canAlignKeyframesToMarker;
-+ (void) alignKeyframesToMarker;
-
-+ (BOOL) canStretchSelectedKeyframes;
-+ (void) stretchSelectedKeyframes:(float) factor;
-
-+ (BOOL) canScaleSelectedNode;
-+ (void) scaleSelectedNode:(float) factor;
-
-+ (BOOL) canReverseSelectedKeyframes;
-+ (void) reverseSelectedKeyframes;
+@property (nonatomic,assign) float factor;
 
 @end

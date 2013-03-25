@@ -22,23 +22,14 @@
  * THE SOFTWARE.
  */
 
-#import <Foundation/Foundation.h>
+#import "SequencerScaleWindow.h"
 
-@interface SequencerUtil : NSObject
+@interface SequencerScaleWindow ()
 
-+ (BOOL) canCreateFramesFromSelectedResources;
-+ (void) createFramesFromSelectedResources;
+@end
 
-+ (BOOL) canAlignKeyframesToMarker;
-+ (void) alignKeyframesToMarker;
+@implementation SequencerScaleWindow
 
-+ (BOOL) canStretchSelectedKeyframes;
-+ (void) stretchSelectedKeyframes:(float) factor;
-
-+ (BOOL) canScaleSelectedNode;
-+ (void) scaleSelectedNode:(float) factor;
-
-+ (BOOL) canReverseSelectedKeyframes;
-+ (void) reverseSelectedKeyframes;
+@synthesize factor;
 
 @end
