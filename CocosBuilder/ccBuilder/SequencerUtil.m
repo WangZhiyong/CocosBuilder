@@ -37,6 +37,7 @@
 
 #import "NodeInfo.h"
 #import "PositionPropertySetter.h"
+#import "CCBDocument.h"
 
 @interface CCNode(NodeScaleWithChildren)
 - (void)scaleWithChildrenBy:(float)factor;
@@ -46,27 +47,58 @@
 
 - (void)scaleWithChildrenBy:(float)factor {
     
+    NSString *propertyName = @"position";
+    
     for (CCNode *child in _children) {
+
+        NodeInfo* nodeInfo = [child userObject];;
+        PlugInNode* plugIn = nodeInfo.plugIn;
+        SequencerHandler* sh = [SequencerHandler sharedHandler];
         
-        CGPoint pt = child->_position;
-        pt = CGPointMake(pt.x*factor, pt.y*factor);
-        NSArray* animValue = [NSArray arrayWithObjects:
-                              [NSNumber numberWithFloat:pt.x],
-                              [NSNumber numberWithFloat:pt.y],
-                              NULL];
-        
-        PlugInNode *plugIn = [child plugIn];
-        
-        //  1) scale position automatically
-        if ([plugIn isAnimatableProperty:@"position" node:child])
+        NSMutableArray *allSequences = [[[CocosBuilderAppDelegate appDelegate] currentDocument] sequences];
+
+        //  1) scale node's position
         {
-            NodeInfo *nodeInfo = [child userObject];;
-            [[nodeInfo baseValues] setObject:animValue forKey:@"position"];
+            CGPoint pt = child->_position;
+            pt = CGPointMake(pt.x*factor, pt.y*factor);
+            [PositionPropertySetter setPosition:NSPointFromCGPoint(pt) forNode:child prop:propertyName];
             
-            [PositionPropertySetter setPosition:NSPointFromCGPoint(pt) forNode:child prop:@"position"];
+            NSArray *posValueArray = [nodeInfo.baseValues objectForKey:propertyName];
+            if (posValueArray!=NULL) {
+                
+                NSPoint oldPos = NSMakePoint([[posValueArray objectAtIndex:0] floatValue], [[posValueArray objectAtIndex:1] floatValue]);
+                NSPoint newPos = NSMakePoint(oldPos.x * factor, oldPos.y*factor);
+                
+                NSValue *ptValue = [NSArray arrayWithObjects:[NSNumber numberWithFloat:newPos.x], [NSNumber numberWithFloat:newPos.y], nil];
+                [nodeInfo.baseValues setObject:ptValue forKey:propertyName];
+                
+                [nodeInfo.extraProps setValue:[NSValue valueWithPoint:newPos] forKey:propertyName];
+            }
         }
         
-        //  2) scale CCLayerColor node automatically
+        //  2) update all its sequences & keyframes
+        for (SequencerSequence *seq in allSequences) {
+            
+            int sequenceID = [seq sequenceId];
+            SequencerNodeProperty* seqNodeProp = [child sequenceNodeProperty:propertyName sequenceId:sequenceID];
+            
+            //  if it has position keyframes, update all keyframes position value
+            if (seqNodeProp)
+            {
+                for (SequencerKeyframe *keyframe in [seqNodeProp keyframes]) {
+                    
+                    NSPoint oldPos = NSMakePoint([[keyframe.value objectAtIndex:0] floatValue], [[keyframe.value objectAtIndex:1] floatValue]);
+                    NSPoint newPos = NSMakePoint(oldPos.x * factor, oldPos.y*factor);
+                    NSArray* ptValue = [NSArray arrayWithObjects:[NSNumber numberWithFloat:newPos.x], [NSNumber numberWithFloat:newPos.y], NULL];
+                    
+                    keyframe.value = ptValue;
+                }
+                
+                [sh redrawTimeline];
+            }
+        }
+        
+        //  3) scale CCLayerColor node
         if ([[plugIn nodeClassName] isEqualToString:@"CCLayerColor"]) {
             
             NodeInfo *nodeInfo = [child userObject];;
@@ -306,8 +338,6 @@
     
     CCNode *startNode = [appDelegate selectedNode];
     [startNode scaleWithChildrenBy:factor];
-
-    [[SequencerHandler sharedHandler] updatePropertiesToTimelinePosition];
 }
 
 + (BOOL) canReverseSelectedKeyframes

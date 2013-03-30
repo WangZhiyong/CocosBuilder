@@ -3013,8 +3013,7 @@ static BOOL hideAllToNextSeparator;
 
 - (IBAction)menuScaleSelectedNode:(id)sender
 {
-    if ([[self selectedNodes] count] !=1)
-        [self setSelectedNodes: [NSArray arrayWithObject:[CocosScene cocosScene].rootNode]];
+    [self setSelectedNodes: [NSArray arrayWithObject:[CocosScene cocosScene].rootNode]];
     
     SequencerScaleWindow* wc = [[[SequencerScaleWindow alloc] initWithWindowNibName:@"SequencerScaleWindow"] autorelease];
     wc.factor = 1;
