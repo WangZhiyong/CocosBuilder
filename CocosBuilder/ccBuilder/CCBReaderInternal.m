@@ -336,6 +336,11 @@ NSDictionary* renamedProperties = NULL;
     // Fetch info and extra properties
     NodeInfo* nodeInfo = node.userObject;
     NSMutableDictionary* extraProps = nodeInfo.extraProps;
+    
+    //  restore the isExpanded property
+    if ([dict valueForKey:@"isExpanded"] && [[dict valueForKey:@"isExpanded"] boolValue]==NO)
+        [extraProps setValue:[NSNumber numberWithBool:NO] forKey:@"isExpanded"];
+    
     PlugInNode* plugIn = nodeInfo.plugIn;
     
     // Flash skew compatibility

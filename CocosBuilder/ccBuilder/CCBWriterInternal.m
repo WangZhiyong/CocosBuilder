@@ -559,6 +559,9 @@
         [dict setObject:jsController forKey:@"jsController"];
     }
     
+    // Add expanded flag
+    [dict setObject:[extraProps objectForKey:@"isExpanded"] forKey:@"isExpanded"];
+    
     return dict;
 }
 
