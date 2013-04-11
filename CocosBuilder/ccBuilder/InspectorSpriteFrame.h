@@ -28,6 +28,7 @@
 {
     IBOutlet NSPopUpButton* popup;
     IBOutlet NSMenu* menu;
+    IBOutlet NSPopUpButton* smartPopup;
 }
 
 @end

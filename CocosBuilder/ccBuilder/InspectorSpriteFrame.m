@@ -36,7 +36,49 @@
 #import "SequencerHandler.h"
 #import "SequencerSequence.h"
 
+static NSMutableArray *cachedMenuItems = nil;
+
 @implementation InspectorSpriteFrame
+
+- (void) smartFilterMenuItems:(NSMenu*)menuObject withFile:(NSString*)filename
+{
+    for (NSMenuItem *item in [menuObject itemArray]) {
+        
+        NSMenu *subMenu = [item submenu];
+        if (subMenu) {
+            [self smartFilterMenuItems:subMenu withFile:filename];
+            continue;
+        }
+        
+        RMResource *resObject = [item representedObject];
+        if (!resObject)
+            continue;
+        
+        NSString *pathToMatch = [filename stringByDeletingLastPathComponent];
+        NSString *path = [[resObject filePath] stringByDeletingLastPathComponent];
+
+        if ([path hasSuffix:pathToMatch])
+            [cachedMenuItems addObject:item];
+    }
+    
+    [menuObject removeAllItems];
+}
+
+- (void) refreshSmartPopupMenuWith:(NSString*)filename {
+   
+    cachedMenuItems = [NSMutableArray array];
+    [ResourceManagerUtil populateResourcePopup:smartPopup resType:kCCBResTypeImage allowSpriteFrames:YES selectedFile:filename selectedSheet:NULL target:self];
+    [self smartFilterMenuItems:[smartPopup menu] withFile:filename];
+    for (NSMenuItem *item in cachedMenuItems) {
+        
+        [[smartPopup menu] addItem:item];
+        if ([[item title] isEqualToString:[filename lastPathComponent]])
+            [item setState: NSOnState];
+        else
+            [item setState: NSOffState];
+    }
+    cachedMenuItems = nil;
+}
 
 - (void) willBeAdded
 {
@@ -50,6 +92,9 @@
     if ([ssf isEqualToString:kCCBUseRegularFile] || [ssf isEqualToString:@""]) ssf = NULL;
     
     [ResourceManagerUtil populateResourcePopup:popup resType:kCCBResTypeImage allowSpriteFrames:YES selectedFile:sf selectedSheet:ssf target:self];
+    
+    //  update smartPopup's menu
+    [self refreshSmartPopupMenuWith:sf];
 }
 
 - (void) selectedResource:(id)sender
@@ -71,6 +116,9 @@
             sf = [ResourceManagerUtil relativePathFromAbsolutePath:res.filePath];
             ssf = kCCBUseRegularFile;
             [ResourceManagerUtil setTitle:sf forPopup:popup];
+            
+            //  update smartPopup's menu
+            [self refreshSmartPopupMenuWith:sf];
         }
     }
     else if ([item isKindOfClass:[RMSpriteFrame class]])
