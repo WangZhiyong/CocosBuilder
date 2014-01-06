@@ -28,7 +28,8 @@
 
 - (void) setColor:(NSColor *)color
 {
-    color = [color colorUsingColorSpace:[NSColorSpace deviceRGBColorSpace]];
+	//	WARNING: below code causes color value error
+    //color = [color colorUsingColorSpace:[NSColorSpace deviceRGBColorSpace]];
     
     CGFloat r, g, b, a;
     [color getRed:&r green:&g blue:&b alpha:&a];
@@ -51,7 +52,8 @@
 
 - (void) setColorVar:(NSColor *)color
 {
-    color = [color colorUsingColorSpace:[NSColorSpace deviceRGBColorSpace]];
+	//	WARNING: below code causes color value error
+    //color = [color colorUsingColorSpace:[NSColorSpace deviceRGBColorSpace]];
     
     CGFloat r, g, b, a;
     [color getRed:&r green:&g blue:&b alpha:&a];
