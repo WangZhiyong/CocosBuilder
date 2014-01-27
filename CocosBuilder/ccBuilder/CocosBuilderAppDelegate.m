@@ -91,7 +91,7 @@
 #import "NodeGraphPropertySetter.h"
 #import "CCBSplitHorizontalView.h"
 #import "SpriteSheetSettingsWindow.h"
-
+#import "SequencerSearchWindow.h"
 
 #import <ExceptionHandling/NSExceptionHandler.h>
 
@@ -122,6 +122,8 @@
 @synthesize panelVisibilityControl;
 @synthesize connection;
 @synthesize loopPlayback;
+@synthesize searchingResult;
+@synthesize currentSearchingResult;
 
 static CocosBuilderAppDelegate* sharedAppDelegate;
 
@@ -1092,6 +1094,8 @@ static BOOL hideAllToNextSeparator;
     [self prepareForDocumentSwitch];
     
     self.currentDocument = document;
+	self.currentSearchingResult = 0;
+	self.searchingResult = nil;
     
     NSMutableDictionary* doc = document.docData;
     
@@ -3117,6 +3121,231 @@ static BOOL hideAllToNextSeparator;
 - (NSUndoManager*) windowWillReturnUndoManager:(NSWindow *)window
 {
     return currentDocument.undoManager;
+}
+
+- (IBAction) menuSearch:(id)sender {
+	
+	if (!currentDocument)
+		return;
+	
+    SequencerSearchWindow* wc = [[[SequencerSearchWindow alloc] initWithWindowNibName:@"SequencerSearchWindow"] autorelease];
+    int success = [wc runModalSheetForWindow:window];
+    if (success)
+    {
+        //[SequencerUtil scaleSelectedNode:1];
+    }
+}
+
+- (CCNode*)findNodeWithPath:(NSString*)pathString andNode:(CCNode*)currentNode {
+	
+	if ([pathString length] == 0)
+		return currentNode;
+	
+	int childIndex = -1;
+	NSString *strNumberLeft = nil;
+	
+	NSRange range = [pathString rangeOfString:@"/"];
+	if (range.location == 0)
+		return nil;
+	
+	if (range.location == NSNotFound) {
+		
+		childIndex = [pathString intValue];
+	}
+	else {
+	
+		NSString *strNumber = [pathString substringWithRange:NSMakeRange(0, range.location)];
+		strNumberLeft = [pathString substringFromIndex:range.location + 1];
+		childIndex = [strNumber intValue];
+	}
+	
+	CCNode *childNode = [[currentNode children] objectAtIndex:childIndex];
+	return [self findNodeWithPath:strNumberLeft andNode:childNode];
+}
+
+- (void) updateWithSelectedSearchingResultWith:(unsigned int)index {
+	
+	//	select node
+	CCNode *rootNode = [[CocosScene cocosScene] rootNode];
+	if (!rootNode || index >= [self.searchingResult count])
+		return;
+	
+	NSString *resultString = [self.searchingResult objectAtIndex:index];
+	NSArray *resultArray = [resultString componentsSeparatedByString:@":"];
+	NSString *indexPath = [resultArray objectAtIndex:3];
+	
+	CCNode *destNode = [self findNodeWithPath:[indexPath substringFromIndex:2] andNode:rootNode];
+	if (destNode) {
+		
+		NSMutableArray *nodesArray = [NSMutableArray array];
+		[nodesArray addObject:destNode];
+		[self setSelectedNodes:nodesArray];
+		
+		NSAlert *alert = [NSAlert alertWithMessageText:@"" defaultButton:@"" alternateButton:nil otherButton:nil
+							 informativeTextWithFormat:@"type: %@, picture:%@", [resultArray objectAtIndex:1], [resultArray objectAtIndex:0]];
+		[alert runModal];
+	}
+}
+
+- (IBAction) menuSearchPrev:(id)sender {
+	
+	if (!currentDocument || [self.searchingResult count] <= 1)
+		return;
+	
+	//	change index
+	self.currentSearchingResult -= 1;
+	if (self.currentSearchingResult == -1)
+		self.currentSearchingResult = [self.searchingResult count] - 1;
+	
+	[self updateWithSelectedSearchingResultWith:self.currentSearchingResult];
+}
+
+- (IBAction) menuSearchNext:(id)sender {
+	
+	if (!currentDocument || [self.searchingResult count] <= 1)
+		return;
+	
+	//	change index
+	self.currentSearchingResult += 1;
+	if (self.currentSearchingResult == [self.searchingResult count])
+		self.currentSearchingResult = 0;
+	
+	[self updateWithSelectedSearchingResultWith:self.currentSearchingResult];
+}
+
+#pragma mark Search
+
+- (NSString*) getSpriteNodesBaseVauePictureWithNode:(NSDictionary*)spriteNode {
+	
+	if ([[spriteNode valueForKey:@"baseClass"] isEqualToString:@"CCSprite"] == NO)
+		return nil;
+	
+	for (NSDictionary *prop in [spriteNode objectForKey:@"properties"]) {
+		
+		if ([[prop valueForKey:@"name"] isEqualToString:@"displayFrame"] == NO)
+			continue;
+		
+		NSArray *valArray = [prop valueForKey:@"baseValue"];
+		if (valArray != nil)
+			return [valArray objectAtIndex:0];
+	}
+	
+	return nil;
+}
+
+- (NSArray*) getNodesAnimationFramesListWithNode:(NSDictionary *)spriteNode {
+
+	NSMutableArray *resultArray = [NSMutableArray array];
+	
+	if ([[spriteNode valueForKey:@"baseClass"] isEqualToString:@"CCSprite"] == NO ||
+		[spriteNode objectForKey:@"animatedProperties"] == nil )
+		return nil;
+	
+	for (NSDictionary *propDict in [[spriteNode objectForKey:@"animatedProperties"] allValues]) {
+		
+		for (NSDictionary *val in [propDict allValues]) {
+			
+			if ([[val valueForKey:@"name"] isEqualToString:@"displayFrame"] == NO || [[val valueForKey:@"type"] intValue] != 7)
+				continue;
+			
+			NSArray *keyframesArray = [val valueForKey:@"keyframes"];
+			for (NSDictionary *keyframe in keyframesArray) {
+				if ([[keyframe valueForKey:@"name"] isEqualToString:@"displayFrame"] == NO)
+					continue;
+				
+				NSArray *value = [keyframe valueForKey:@"value"];
+				[resultArray addObject:[value objectAtIndex:0]];
+			}
+		}
+	}
+	
+	return resultArray;
+}
+
+- (NSString*) getSpriteNodesPictureWithNode:(NSDictionary *)spriteNode {
+	
+	if ([[spriteNode valueForKey:@"baseClass"] isEqualToString:@"CCSprite"] == NO)
+		return nil;
+	
+	for (NSDictionary *prop in [spriteNode objectForKey:@"properties"]) {
+		
+		if ([[prop valueForKey:@"name"] isEqualToString:@"displayFrame"] == NO)
+			continue;
+		
+		NSArray *valArray = [prop valueForKey:@"value"];
+		return [valArray objectAtIndex:1];
+	}
+	
+	return nil;
+}
+
+- (void) searchNodeGraph:(NSDictionary*)nodeDict withPictureName:(NSString *)name
+			 currentPath:(NSString*)path indexPath:(NSString*)indexPath andResult:(NSMutableArray*)resultArray {
+	
+	NSString *currentNodePath = [NSString stringWithFormat:@"%@/%@", path, [nodeDict valueForKey:@"displayName"]];
+	
+	//	sprite's displayFrame
+	if ([[nodeDict valueForKey:@"baseClass"] isEqualToString:@"CCSprite"]) {
+		
+		NSString *picPath = [self getSpriteNodesPictureWithNode:nodeDict];
+		NSRange resultRange = [picPath rangeOfString:name options:NSCaseInsensitiveSearch];
+		if (picPath && resultRange.location != NSNotFound)
+			[resultArray addObject:[NSString stringWithFormat:@"%@:Sprite:%@:%@", picPath, currentNodePath, indexPath]];
+		
+		// check animation
+		NSArray *aniKeyframes = [self getNodesAnimationFramesListWithNode:nodeDict];
+		int idx = 0;
+		for (NSString *strFile in aniKeyframes) {
+			
+			idx += 1;
+			resultRange = [strFile rangeOfString:name options:NSCaseInsensitiveSearch];
+			if (strFile && resultRange.location != NSNotFound)
+				[resultArray addObject:[NSString stringWithFormat:@"%@:Keyframe(%d):%@:%@", strFile, idx, currentNodePath, indexPath]];
+		}
+		
+		// baseValue referred picture
+		NSString *picPathBaseVal = [self getSpriteNodesBaseVauePictureWithNode:nodeDict];
+		resultRange = [picPathBaseVal rangeOfString:name options:NSCaseInsensitiveSearch];
+		if (picPathBaseVal && resultRange.location != NSNotFound)
+			[resultArray addObject:[NSString stringWithFormat:@"%@:BaseValue:%@:%@", picPathBaseVal, currentNodePath, indexPath]];
+	}
+	else if ([[nodeDict valueForKey:@"baseClass"] isEqualToString:@"CCParticleSystemQuad"]) {
+		
+		for (NSDictionary *propDict in [nodeDict objectForKey:@"properties"]) {
+			
+			if ([[propDict valueForKey:@"name"] isEqualToString:@"texture"] != YES ||
+				[[propDict valueForKey:@"type"] isEqualToString:@"Texture"] != YES)
+				continue;
+			
+			NSString *picName = [propDict valueForKey:@"value"];
+			NSRange resultRange = [picName rangeOfString:name options:NSCaseInsensitiveSearch];
+			if (resultRange.location != NSNotFound)
+				[resultArray addObject:[NSString stringWithFormat:@"%@:Particle:%@:%@", picName, currentNodePath, indexPath]];
+		}
+	}
+
+	// recursively
+	int index = 0;
+    for (NSDictionary* subNode in [nodeDict valueForKey:@"children"]) {
+		
+		NSString *idxPth = [NSString stringWithFormat:@"%@/%d", indexPath, index];
+		index += 1;
+        [self searchNodeGraph:subNode withPictureName:name currentPath:currentNodePath indexPath:idxPth andResult:resultArray];
+	}
+}
+
+- (NSArray*) searchNodeThatReferredPictureNamed:(NSString*)picName {
+	
+	NSMutableDictionary* doc = [self docDataFromCurrentNodeGraph];
+	NSDictionary *nodeGraph = [doc objectForKey:@"nodeGraph"];
+	
+	NSMutableArray *resultArray = [NSMutableArray array];
+	[self searchNodeGraph:nodeGraph withPictureName:picName currentPath:@"/" indexPath:@"/" andResult:resultArray];
+	
+	self.searchingResult = resultArray;
+	self.currentSearchingResult = 0;
+
+	return resultArray;
 }
 
 #pragma mark Playback countrols

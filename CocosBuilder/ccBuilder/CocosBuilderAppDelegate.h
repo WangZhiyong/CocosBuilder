@@ -210,6 +210,10 @@ enum {
     
     // JavaScript bindings
     BOOL jsControlled;
+	
+	//	Search
+	NSMutableArray *searchingResult;
+	unsigned int currentSearchingResult;
     
 @private
     MainWindow *window;
@@ -253,6 +257,9 @@ enum {
 @property (nonatomic,readonly) PlayerConnection* connection;
 
 @property (nonatomic,copy) NSString* errorDescription;
+
+@property (retain) NSMutableArray *searchingResult;
+@property (assign) unsigned int currentSearchingResult;
 
 // Transparent window
 - (void) resizeGUIWindow:(NSSize)size;
@@ -315,6 +322,14 @@ enum {
 - (void) reloadResources;
 - (IBAction)menuAddStickyNote:(id)sender;
 - (IBAction) menuCleanCacheDirectories:(id)sender;
+
+- (void) updateWithSelectedSearchingResultWith:(unsigned int)index;
+- (IBAction) menuSearch:(id)sender;
+- (IBAction) menuSearchNext:(id)sender;
+- (IBAction) menuSearchPrev:(id)sender;
+
+// Search
+- (NSArray*) searchNodeThatReferredPictureNamed:(NSString*)picName;
 
 // Undo / Redo
 - (void) updateDirtyMark;
