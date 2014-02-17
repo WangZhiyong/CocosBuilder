@@ -32,7 +32,8 @@
     if (!self) return NULL;
     
     self.positionType = kCCPositionTypeGrouped;
-    
+	self.active = NO;
+	
     return self;
 }
 

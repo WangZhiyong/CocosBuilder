@@ -3350,6 +3350,32 @@ static BOOL hideAllToNextSeparator;
 
 #pragma mark Playback countrols
 
+- (void) findAllParticlesNodeWith:(CCNode*)node into:(NSMutableArray*)outArray {
+	
+	if ([node isKindOfClass:[CCParticleSystem class]])
+		[outArray addObject:node];
+	
+	if ([node children] == nil)
+		return;
+	
+	for (CCNode *child in [node children])
+		[self findAllParticlesNodeWith:child into:outArray];
+}
+
+- (void) playbackResetAllParticlesNode {
+	
+	CCNode *rootNode = [CocosScene cocosScene].rootNode;
+	NSMutableArray *allPriticlesNode = [NSMutableArray array];
+	[self findAllParticlesNodeWith:rootNode into:allPriticlesNode];
+	
+	for (CCParticleSystem *par in allPriticlesNode) {
+
+		[par setActive:YES];
+		[par resetSystem];
+		[par updateWithNoTime];
+	}
+}
+
 - (void) playbackStep:(id) sender
 {
     int frames = [sender intValue];
@@ -3391,6 +3417,9 @@ static BOOL hideAllToNextSeparator;
                     nextStep++;
                 }
                 
+				//	Reset Particles
+				[self playbackResetAllParticlesNode];
+				
                 // Call this method again in a little while
                 [self performSelector:@selector(playbackStep:) withObject:[NSNumber numberWithInt:nextStep] afterDelay:delayTime];
             }
@@ -3435,6 +3464,9 @@ static BOOL hideAllToNextSeparator;
     playbackLastFrameTime = [NSDate timeIntervalSinceReferenceDate];
     playingBack = YES;
     [self playbackStep:[NSNumber numberWithInt:1]];
+	
+	//	Reset Particles
+	[self playbackResetAllParticlesNode];
 }
 
 - (IBAction)playbackStop:(id)sender
