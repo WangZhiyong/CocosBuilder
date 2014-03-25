@@ -115,6 +115,8 @@
 		A09AB6F714E993AA009C8B91 /* fps_images.png in Resources */ = {isa = PBXBuildFile; fileRef = A09AB6F614E993AA009C8B91 /* fps_images.png */; };
 		CB8602281895483A004CC622 /* SequencerSearchWindow.m in Sources */ = {isa = PBXBuildFile; fileRef = CB8602261895483A004CC622 /* SequencerSearchWindow.m */; };
 		CB8602291895483A004CC622 /* SequencerSearchWindow.xib in Resources */ = {isa = PBXBuildFile; fileRef = CB8602271895483A004CC622 /* SequencerSearchWindow.xib */; };
+		CBAAE2ED18E095F700F59B43 /* PlayWithSoundWindow.m in Sources */ = {isa = PBXBuildFile; fileRef = CBAAE2EB18E095F700F59B43 /* PlayWithSoundWindow.m */; };
+		CBAAE2EE18E095F700F59B43 /* PlayWithSoundWindow.xib in Resources */ = {isa = PBXBuildFile; fileRef = CBAAE2EC18E095F700F59B43 /* PlayWithSoundWindow.xib */; };
 		CBDF494D1700A8AB003097BC /* SequencerScaleWindow.xib in Resources */ = {isa = PBXBuildFile; fileRef = CBDF494C1700A8AA003097BC /* SequencerScaleWindow.xib */; };
 		CBDF49501700A8D0003097BC /* SequencerScaleWindow.m in Sources */ = {isa = PBXBuildFile; fileRef = CBDF494F1700A8CF003097BC /* SequencerScaleWindow.m */; };
 		E3127AA516C1D8E600D09AA4 /* CCBDirectoryComparer.m in Sources */ = {isa = PBXBuildFile; fileRef = E3127AA416C1D8E600D09AA4 /* CCBDirectoryComparer.m */; };
@@ -969,6 +971,9 @@
 		CB8602251895483A004CC622 /* SequencerSearchWindow.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SequencerSearchWindow.h; sourceTree = "<group>"; };
 		CB8602261895483A004CC622 /* SequencerSearchWindow.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SequencerSearchWindow.m; sourceTree = "<group>"; };
 		CB8602271895483A004CC622 /* SequencerSearchWindow.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = SequencerSearchWindow.xib; sourceTree = "<group>"; };
+		CBAAE2EA18E095F700F59B43 /* PlayWithSoundWindow.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PlayWithSoundWindow.h; sourceTree = "<group>"; };
+		CBAAE2EB18E095F700F59B43 /* PlayWithSoundWindow.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = PlayWithSoundWindow.m; sourceTree = "<group>"; };
+		CBAAE2EC18E095F700F59B43 /* PlayWithSoundWindow.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = PlayWithSoundWindow.xib; sourceTree = "<group>"; };
 		CBDF494C1700A8AA003097BC /* SequencerScaleWindow.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = SequencerScaleWindow.xib; sourceTree = "<group>"; };
 		CBDF494E1700A8CE003097BC /* SequencerScaleWindow.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SequencerScaleWindow.h; sourceTree = "<group>"; };
 		CBDF494F1700A8CF003097BC /* SequencerScaleWindow.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SequencerScaleWindow.m; sourceTree = "<group>"; };
@@ -2635,6 +2640,9 @@
 		E335CAED1576031B00A612EE /* Sequencer */ = {
 			isa = PBXGroup;
 			children = (
+				CBAAE2EA18E095F700F59B43 /* PlayWithSoundWindow.h */,
+				CBAAE2EB18E095F700F59B43 /* PlayWithSoundWindow.m */,
+				CBAAE2EC18E095F700F59B43 /* PlayWithSoundWindow.xib */,
 				CB8602251895483A004CC622 /* SequencerSearchWindow.h */,
 				CB8602261895483A004CC622 /* SequencerSearchWindow.m */,
 				CB8602271895483A004CC622 /* SequencerSearchWindow.xib */,
@@ -4377,6 +4385,7 @@
 				E318CB3916D83F3B00348E0D /* InspectorPopoverFloatXY.xib in Resources */,
 				CBDF494D1700A8AB003097BC /* SequencerScaleWindow.xib in Resources */,
 				CB8602291895483A004CC622 /* SequencerSearchWindow.xib in Resources */,
+				CBAAE2EE18E095F700F59B43 /* PlayWithSoundWindow.xib in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -4841,6 +4850,7 @@
 				E3B5EE8916D6E0AA00C07990 /* InspectorFloatXY.m in Sources */,
 				CBDF49501700A8D0003097BC /* SequencerScaleWindow.m in Sources */,
 				CB8602281895483A004CC622 /* SequencerSearchWindow.m in Sources */,
+				CBAAE2ED18E095F700F59B43 /* PlayWithSoundWindow.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

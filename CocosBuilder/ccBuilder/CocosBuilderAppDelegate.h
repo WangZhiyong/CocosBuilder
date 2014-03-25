@@ -214,6 +214,10 @@ enum {
 	//	Search
 	NSMutableArray *searchingResult;
 	unsigned int currentSearchingResult;
+	
+	//	Sound Effect
+	NSString *savedSoundResourcesPath;
+	NSMutableDictionary *savedSoundsDictionary;
     
 @private
     MainWindow *window;
@@ -260,6 +264,9 @@ enum {
 
 @property (retain) NSMutableArray *searchingResult;
 @property (assign) unsigned int currentSearchingResult;
+
+@property (retain) NSString *savedSoundResourcesPath;
+@property (retain) NSMutableDictionary *savedSoundsDictionary;
 
 // Transparent window
 - (void) resizeGUIWindow:(NSSize)size;

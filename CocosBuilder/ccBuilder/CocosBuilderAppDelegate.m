@@ -92,6 +92,8 @@
 #import "CCBSplitHorizontalView.h"
 #import "SpriteSheetSettingsWindow.h"
 #import "SequencerSearchWindow.h"
+#import "PlayWithSoundWindow.h"
+#import "SimpleAudioEngine.h"
 
 #import <ExceptionHandling/NSExceptionHandler.h>
 
@@ -124,6 +126,7 @@
 @synthesize loopPlayback;
 @synthesize searchingResult;
 @synthesize currentSearchingResult;
+@synthesize savedSoundResourcesPath, savedSoundsDictionary;
 
 static CocosBuilderAppDelegate* sharedAppDelegate;
 
@@ -3473,6 +3476,47 @@ static BOOL hideAllToNextSeparator;
 {
     NSLog(@"playbackStop");
     playingBack = NO;
+}
+
+- (IBAction)playbackPlayWithSound:(id)sender
+{
+	//	rewind
+	//[self playbackJumpToStart:sender];
+	
+	//	input
+	PlayWithSoundWindow* wc = [[[PlayWithSoundWindow alloc] initWithWindowNibName:@"PlayWithSoundWindow"] autorelease];
+	wc.ccbFilePath = currentDocument.fileName;
+	wc.soundResoucesPath = self.savedSoundResourcesPath;
+	wc.soundFilePath = @"";
+	
+	NSString *savedFilename = [self.savedSoundsDictionary objectForKey:wc.ccbFilePath];
+	if (savedFilename) {
+		wc.soundFilePath = savedFilename;
+	}
+	else if ([self.savedSoundResourcesPath length]) {
+		
+		[wc smartUpdatePathWithPath:self.savedSoundResourcesPath];
+	}
+    
+    int success = [wc runModalSheetForWindow:window];
+    if (!success)
+		return;
+	
+	self.savedSoundResourcesPath = [NSString stringWithString:wc.soundResoucesPath];
+	if ([[NSFileManager defaultManager] fileExistsAtPath:wc.soundFilePath]) {
+		[self.savedSoundsDictionary setValue:wc.soundFilePath forKey:currentDocument.fileName];
+	}
+	else {
+		NSAlert* alert = [NSAlert alertWithMessageText:@"ERROR" defaultButton:@"OK" alternateButton:NULL otherButton:NULL informativeTextWithFormat:@"sound file (%@) not exists!", wc.soundFilePath];
+		[alert runModal];
+		return;
+	}
+	
+	//	play sound
+	[[SimpleAudioEngine sharedEngine] playEffect:wc.soundFilePath];
+	
+	//	play
+	[self performSelectorOnMainThread:@selector(playbackPlay:) withObject:nil waitUntilDone:NO];
 }
 
 - (IBAction)playbackJumpToStart:(id)sender
