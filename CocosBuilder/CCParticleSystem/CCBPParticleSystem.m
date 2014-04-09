@@ -37,6 +37,16 @@
     return self;
 }
 
+- (int) particlePositionType {
+	
+	return _positionType;
+}
+
+- (void) setParticlePositionType:(tCCPositionType)type {
+	
+	_positionType = type;
+}
+
 #pragma mark Gravity mode
 
 - (CGPoint) gravity

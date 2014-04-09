@@ -56,6 +56,16 @@
 			<string>Gravity mode|0|Radius mode|1</string>
 		</dict>
 		<dict>
+			<key>displayName</key>
+			<string>Particles Position</string>
+			<key>name</key>
+			<string>particlePositionType</string>
+			<key>type</key>
+			<string>IntegerLabeled</string>
+			<key>extra</key>
+			<string>Free Mode|0|Follow Mode|1|Groupe Mode|2</string>
+		</dict>
+		<dict>
 			<key>default</key>
 			<array>
 				<integer>40</integer>
