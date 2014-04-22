@@ -169,6 +169,58 @@
 			<key>displayName</key>
 			<string>Ignore anchor point</string>
 		</dict>
+		<dict>
+			<key>displayName</key>
+			<string>Extra Animation Behavior</string>
+			<key>type</key>
+			<string>SeparatorSub</string>
+		</dict>
+		<dict>
+			<key>defaultSerialization</key>
+			<integer>0</integer>
+			<key>displayName</key>
+			<string>Loop Forever</string>
+			<key>name</key>
+			<string>loopForever</string>
+			<key>type</key>
+			<string>IntegerLabeled</string>
+			<key>extra</key>
+			<string>NO|0|YES|1</string>
+		</dict>
+		<dict>
+			<key>defaultSerialization</key>
+			<integer>0</integer>
+			<key>type</key>
+			<string>Integer</string>
+			<key>name</key>
+			<string>randomHiddenProbability</string>
+			<key>displayName</key>
+			<string>Hidden Probability</string>
+		</dict>
+		<dict>
+			<key>defaultSerialization</key>
+			<integer>0</integer>
+			<key>animatable</key>
+			<false/>
+			<key>type</key>
+			<string>Float</string>
+			<key>name</key>
+			<string>minRandomDelayTime</string>
+			<key>displayName</key>
+			<string>Min Delay Time</string>
+		</dict>
+		<dict>
+			<key>defaultSerialization</key>
+			<integer>0</integer>
+			<key>animatable</key>
+			<false/>
+			<key>type</key>
+			<string>Float</string>
+			<key>name</key>
+			<string>maxRandomDelayTime</string>
+			<key>displayName</key>
+			<string>Max Delay Time</string>
+		</dict>
 	</array>
 	<key>propertiesOverridden</key>
 	<array/>

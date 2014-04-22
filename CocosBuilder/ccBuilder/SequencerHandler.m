@@ -758,7 +758,33 @@ static SequencerHandler* sharedSequencerHandler;
 
 - (void) updatePropertiesToTimelinePositionForNode:(CCNode*)node sequenceId:(int)seqId localTime:(float)time
 {
-    [node updatePropertiesTime:time sequenceId:seqId];
+	float applyTime = time;
+	
+	//	process loopForever property of CCNode
+	if (node != [[CocosScene cocosScene] rootNode] && node.loopForever == YES) {
+		
+		// get all keyframes
+		NodeInfo* info = node.userObject;
+		
+		NSEnumerator* animPropEnum = [info.animatableProperties objectEnumerator];
+		NSDictionary* seq;
+		float lastKeyframeTime = 0;
+		while ((seq = [animPropEnum nextObject]))
+		{
+			NSEnumerator* seqEnum = [seq objectEnumerator];
+			SequencerNodeProperty* prop;
+			while ((prop = [seqEnum nextObject]))
+			{
+				SequencerKeyframe *lastKeyframe = [[prop keyframes] lastObject];
+				lastKeyframeTime = MAX(lastKeyframeTime, lastKeyframe.time);
+			}
+		}
+		
+		//	result
+		applyTime = fmod(time, lastKeyframeTime);
+	}
+
+	[node updatePropertiesTime:applyTime sequenceId:seqId];
     
     // Also deselect keyframes of children
     CCArray* children = [node children];
